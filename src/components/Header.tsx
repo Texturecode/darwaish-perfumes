@@ -39,7 +39,7 @@ export default function Header({ cartCount = 0 }: { cartCount?: number }) {
             href="/"
             className=""
           >
-            <img src="/logo.png" alt="Darwaish Perfumes" className="h-20 w-full" />
+            <img src="/logo.PNG" alt="Darwaish Perfumes" className="h-20 w-full" />
           </Link>
 
           {/* Desktop nav */}

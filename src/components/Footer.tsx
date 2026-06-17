@@ -27,7 +27,7 @@ export default function Footer() {
         <div className="grid lg:grid-cols-3 gap-12 pb-16">
           <div className="flex flex-col gap-4">
             <div className="relative w-32 h-12">
-              <img src="/logo.png" alt="Darwaish Perfumes" className="object-contain" />
+              <img src="/logo.PNG" alt="Darwaish Perfumes" className="object-contain" />
             </div>
             <p className="text-sm text-smoke-light font-body max-w-xs leading-relaxed mt-3">
               Fragrances for men and women, blended with ethically sourced
