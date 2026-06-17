@@ -37,9 +37,9 @@ export default function Header({ cartCount = 0 }: { cartCount?: number }) {
           {/* Logo */}
           <Link
             href="/"
-            className="font-display text-2xl sm:text-3xl tracking-wide text-ivory"
+            className=""
           >
-            Darwaish
+            <img src="/logo.png" alt="Darwaish Perfumes" className="h-20 w-full" />
           </Link>
 
           {/* Desktop nav */}

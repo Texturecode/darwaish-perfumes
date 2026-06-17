@@ -8,9 +8,6 @@ import BurnDivider from "./BurnDivider";
 const QUICK_LINKS = [
   { label: "Shop", href: "/shop" },
   { label: "Men", href: "/collections/men" },
-  { label: "Women", href: "/collections/women" },
-  { label: "Unisex", href: "/collections/unisex" },
-  { label: "Travel Set", href: "/collections/travel-set" },
   { label: "Contact Us", href: "/contact" },
 ];
 
@@ -29,8 +26,10 @@ export default function Footer() {
       <div className="max-w-7xl mx-auto px-6 lg:px-10">
         <div className="grid lg:grid-cols-3 gap-12 pb-16">
           <div className="flex flex-col gap-4">
-            <span className="font-display text-2xl text-ivory">Darwaish</span>
-            <p className="text-sm text-smoke-light font-body max-w-xs leading-relaxed">
+            <div className="relative w-32 h-12">
+              <img src="/logo.png" alt="Darwaish Perfumes" className="object-contain" />
+            </div>
+            <p className="text-sm text-smoke-light font-body max-w-xs leading-relaxed mt-3">
               Fragrances for men and women, blended with ethically sourced
               oud, attar, and a concentration built to last.
             </p>
