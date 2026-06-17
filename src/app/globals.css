@@ -1,0 +1,83 @@
+@import "tailwindcss";
+
+/*
+  Tailwind v4 is CSS-first: design tokens are declared here with @theme
+  instead of in tailwind.config.ts. Each --color-*, --font-*, --animate-*
+  variable below automatically generates matching utilities, e.g.
+  --color-ink generates bg-ink / text-ink / border-ink, etc.
+*/
+@theme {
+  /* Color tokens */
+  --color-ink: #0B0908;          /* base background, warm-black not flat black */
+  --color-ink-soft: #15110F;     /* raised surface on dark */
+
+  --color-brass: #B8923C;        /* primary accent, aged gold not bright gold */
+  --color-brass-light: #D4B872;
+  --color-brass-dark: #8C6B26;
+
+  --color-oxblood: #5C1A1A;      /* secondary accent, oud/velvet */
+  --color-oxblood-light: #7A2A2A;
+
+  --color-ivory: #F2EAD9;        /* body text on dark, light section bg */
+  --color-ivory-dim: #E5DCC8;
+
+  --color-smoke: #8A8276;        /* secondary text, dividers */
+  --color-smoke-light: #A39B8E;
+
+  /* Font tokens — variables come from next/font in app/layout.tsx */
+  --font-display: var(--font-fraunces), Georgia, serif;
+  --font-body: var(--font-manrope), system-ui, sans-serif;
+  --font-mono: var(--font-jetbrains), monospace;
+
+  /* Letter spacing token -> generates tracking-widest2 */
+  --tracking-widest2: 0.25em;
+
+  /* Keyframes -> generate animate-smoke-drift / animate-burn-in / animate-fade-up */
+  --animate-smoke-drift: smokeDrift 18s ease-in-out infinite;
+  --animate-burn-in: burnIn 1.1s ease-out forwards;
+  --animate-fade-up: fadeUp 0.7s ease-out forwards;
+
+  @keyframes smokeDrift {
+    0%, 100% { transform: translate(0, 0) scale(1); }
+    50% { transform: translate(-2%, -3%) scale(1.05); }
+  }
+  @keyframes burnIn {
+    0% { width: 0%; opacity: 0; }
+    100% { width: 100%; opacity: 1; }
+  }
+  @keyframes fadeUp {
+    0% { opacity: 0; transform: translateY(16px); }
+    100% { opacity: 1; transform: translateY(0); }
+  }
+}
+
+@layer base {
+  body {
+    background-color: var(--color-ink);
+    color: var(--color-ivory);
+  }
+
+  ::selection {
+    background-color: var(--color-brass);
+    color: var(--color-ink);
+  }
+}
+
+@layer components {
+  /* The "burning hairline" — a tapered gold rule that draws itself in on
+     scroll. Tapering is done with a mask so both ends fade like smoke
+     rather than ending in a hard rectangle. */
+  .hairline-burn {
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--color-brass) 20%, var(--color-brass) 80%, transparent);
+    mask-image: linear-gradient(90deg, transparent, black 15%, black 85%, transparent);
+  }
+
+  .eyebrow {
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: var(--tracking-widest2);
+    color: var(--color-brass);
+  }
+}
