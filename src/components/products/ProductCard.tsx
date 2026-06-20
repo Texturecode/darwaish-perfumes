@@ -1,7 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { Star } from "lucide-react";
-import { Product, formatPKR } from "./types";
+import { Product, formatPKR } from "../types";
 
 export default function ProductCard({ product }: { product: Product }) {
   const onSale =

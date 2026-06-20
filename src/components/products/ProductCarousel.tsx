@@ -2,9 +2,9 @@
 
 import { useRef } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
-import SectionHeading from "./SectionHeading";
+import SectionHeading from "../SectionHeading";
 import ProductCard from "./ProductCard";
-import { Product } from "./types";
+import { Product } from "../types";
 
 type ProductCarouselProps = {
   eyebrow?: string;

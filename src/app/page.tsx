@@ -1,7 +1,7 @@
 import Header from "@/components/Header";
 import Hero from "@/components/Hero";
-import ProductCarousel from "@/components/ProductCarousel";
-import ProductGrid from "@/components/ProductGrid";
+import ProductCarousel from "@/components/products/ProductCarousel";
+import ProductGrid from "@/components/products/ProductGrid";
 import TrustStrip from "@/components/TrustStrip";
 import BrandStory from "@/components/BrandStory";
 import Footer from "@/components/Footer";
@@ -26,25 +26,20 @@ export default function Home() {
     <main>
       <Header cartCount={0} />
       <Hero />
-
       <ProductCarousel
         eyebrow="The Collection"
         title="Signature Series"
         products={SIGNATURE_SERIES}
         viewAllHref="/collections/signature"
       />
-
       <TrustStrip />
-
       <ProductGrid
         eyebrow="Most Loved"
         title="Featured Fragrances"
         products={FEATURED}
         viewAllHref="/shop"
       />
-
       <BrandStory imageSrc="/brand/story.jpg" />
-
       <Footer />
     </main>
   );

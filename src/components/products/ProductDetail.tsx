@@ -2,11 +2,11 @@
 
 import { useState } from "react";
 import { Star, Share2, ShieldCheck, RotateCcw, Droplet } from "lucide-react";
-import ProductGallery from "./ProductGallery";
+import ProductGallery from "../ProductGallery";
 // import FragranceNotes from "./FragranceNotes";
-import QuantityStepper from "./QuantityStepper";
-import BurnDivider from "./BurnDivider";
-import { Product, formatPKR } from "./types";
+import QuantityStepper from "../QuantityStepper";
+import BurnDivider from "../BurnDivider";
+import { Product, formatPKR } from "../types";
 
 // Trust bullets shown under the description — keep these specific to your
 // actual policies/specs.

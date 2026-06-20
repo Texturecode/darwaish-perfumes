@@ -1,6 +1,6 @@
 import Header from "@/components/Header";
-import ProductDetail from "@/components/ProductDetail";
-import ProductCarousel from "@/components/ProductCarousel";
+import ProductDetail from "@/components/products/ProductDetail";
+import ProductCarousel from "@/components/products/ProductCarousel";
 import Footer from "@/components/Footer";
 import { Product } from "@/components/types";
 

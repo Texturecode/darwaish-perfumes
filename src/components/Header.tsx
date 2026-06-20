@@ -14,7 +14,7 @@ const NAV_LINKS = [
 ];
 
 export default function Header({ cartCount = 0 }: { cartCount?: number }) {
-  const [menuOpen, setMenuOpen] = useState(false);
+  const [menuOpen, setMenuOpen] = useState<boolean>(false);
 
   return (
     <header className="sticky top-0 z-50 w-full bg-ink/95 backdrop-blur-sm border-b border-brass/20">

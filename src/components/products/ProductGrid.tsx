@@ -1,6 +1,6 @@
-import SectionHeading from "./SectionHeading";
+import SectionHeading from "../SectionHeading";
 import ProductCard from "./ProductCard";
-import { Product } from "./types";
+import { Product } from "../types";
 
 type ProductGridProps = {
   eyebrow?: string;

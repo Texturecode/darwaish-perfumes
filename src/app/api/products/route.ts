@@ -1,3 +1,5 @@
+import { connectDB } from "@/config/mongodb";
+import Product from "@/models/Product";
 import { NextResponse } from "next/server";
 
 export async function GET() {
@@ -7,16 +9,28 @@ export async function GET() {
   });
 }
 
-export async function POST(request: Request) {
-  const data = await request.json();
-  console.log("Received data:", data);
+// export async function POST(request: Request) {
+//   const data = await request.json();
 
-  return NextResponse.json({
-    message: "Data received successfully",
-    success: true,
-    receivedData: data,
-  });
-}
+
+//   connectDB();
+
+//   Product.create(data)
+//     .then((createdProduct) => {
+//       console.log("Product created successfully:", createdProduct);
+//     })
+//     .catch((error) => {
+//       console.error("Error creating product:", error);
+//     });
+
+
+
+//   return NextResponse.json({
+//     message: "Data received successfully",
+//     success: true,
+//     receivedData: data,
+//   });
+// }
 
 export async function PUT(request: Request) {
   const data = await request.json();

@@ -1,6 +1,6 @@
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
-import ProductGrid from "@/components/ProductGrid";
+import ProductGrid from "@/components/products/ProductGrid";
 import { Product } from "@/components/types";
 import ShopFilters from "@/components/ShopFilters";
 
