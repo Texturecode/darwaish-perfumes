@@ -21,4 +21,5 @@ jobs:
           script: |
             cd /root/darwaish-perfumes
             git pull origin main
+            npm install
             docker compose up -d --build
