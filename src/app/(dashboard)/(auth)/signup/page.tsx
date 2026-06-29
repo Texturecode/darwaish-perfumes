@@ -107,8 +107,7 @@ export default function SignupPage() {
               value={formData.name}
               onChange={handleChange}
               placeholder="John Doe"
-              className="w-full px-4 py-3 bg-smoke border border-smoke-light rounded focus:outline-none focus:border-ivory text-ivory placeholder:text-smoke-light"
-              required
+              className="w-full px-4 py-3 border border-smoke-light/30 rounded text-ivory placeholder:text-smoke-light focus:outline-none focus:border-ivory" required
             />
           </div>
 
@@ -123,8 +122,7 @@ export default function SignupPage() {
               value={formData.email}
               onChange={handleChange}
               placeholder="you@example.com"
-              className="w-full px-4 py-3 bg-smoke border border-smoke-light rounded focus:outline-none focus:border-ivory text-ivory placeholder:text-smoke-light"
-              required
+              className="w-full px-4 py-3 border border-smoke-light/30 rounded text-ivory placeholder:text-smoke-light focus:outline-none focus:border-ivory" required
             />
           </div>
 
@@ -140,8 +138,7 @@ export default function SignupPage() {
                 value={formData.password}
                 onChange={handleChange}
                 placeholder="••••••••"
-                className="w-full px-4 py-3 bg-smoke border border-smoke-light rounded focus:outline-none focus:border-ivory text-ivory placeholder:text-smoke-light"
-                required
+                className="w-full px-4 py-3 border border-smoke-light/30 rounded text-ivory placeholder:text-smoke-light focus:outline-none focus:border-ivory" required
               />
               <button
                 type="button"
@@ -166,8 +163,7 @@ export default function SignupPage() {
                 value={formData.confirmPassword}
                 onChange={handleChange}
                 placeholder="••••••••"
-                className="w-full px-4 py-3 bg-smoke border border-smoke-light rounded focus:outline-none focus:border-ivory text-ivory placeholder:text-smoke-light"
-                required
+                className="w-full px-4 py-3 border border-smoke-light/30 rounded text-ivory placeholder:text-smoke-light focus:outline-none focus:border-ivory" required
               />
               <button
                 type="button"
