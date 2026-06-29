@@ -22,4 +22,6 @@ jobs:
             cd /root/darwaish-perfumes
             git pull origin main
             npm install
-            docker compose up -d --build
+            npm run build
+            npm run start
+            pm2 start "npm run start" --name=darwaish 
