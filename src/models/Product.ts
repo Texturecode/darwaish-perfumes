@@ -16,7 +16,7 @@ interface IFragranceNotes {
 export interface IProduct extends Document {
   name: string;
   slug: string;
-  category: Types.ObjectId;
+  category: Types.ObjectId; 
   notes?: string; // short "Inspired by..." line shown in italics on the PDP
   description?: string;
   fragranceNotes?: IFragranceNotes;
@@ -24,6 +24,7 @@ export interface IProduct extends Document {
   sku?: string;
   images: string[];
   price: number;
+  isFeatured: boolean;
   compareAtPrice?: number;
   stock: number;
   status: ProductStatus;
@@ -70,6 +71,7 @@ const ProductSchema = new Schema<IProduct>(
       type: String,
       default: "",
     },
+    isFeatured: Boolean,
     fragranceNotes: {
       type: FragranceNotesSchema,
       default: () => ({ top: [], middle: [], base: [] }),
@@ -99,13 +101,13 @@ const ProductSchema = new Schema<IProduct>(
     compareAtPrice: {
       type: Number,
       min: 0,
-      validate: {
-        validator: function (this: IProduct, value: number) {
-          // compareAtPrice only makes sense if it's higher than price
-          return value == null || value > this.price;
-        },
-        message: "Compare-at price must be greater than the price.",
-      },
+      // validate: {
+      //   validator: function (this: IProduct, value: number) {
+      //     // compareAtPrice only makes sense if it's higher than price
+      //     return value == null || value > this.price;
+      //   },
+      //   message: "Compare-at price must be greater than the price.",
+      // },
     },
     stock: {
       type: Number,
@@ -133,7 +135,7 @@ const ProductSchema = new Schema<IProduct>(
 );
 
 // Auto-generate slug from name if not explicitly provided
-ProductSchema.pre("validate", function (next) {
+ProductSchema.pre("validate", function (this: IProduct) {
   if (!this.slug && this.name) {
     this.slug = this.name
       .toLowerCase()
@@ -141,15 +143,13 @@ ProductSchema.pre("validate", function (next) {
       .replace(/[^a-z0-9]+/g, "-")
       .replace(/(^-|-$)/g, "");
   }
-  next();
 });
 
 // Keep status honest: if stock hits zero, don't silently show "Active"
-ProductSchema.pre("save", function (next) {
+ProductSchema.pre("save", function (this: IProduct) {
   if (this.stock === 0 && this.status === "Active") {
     this.status = "Sold Out";
   }
-  next();
 });
 
 ProductSchema.index({ category: 1, status: 1 });

@@ -1,34 +1,105 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Upload, X } from "lucide-react";
-import { CATEGORIES, CONCENTRATIONS } from "@/utils/constants";
+import { CONCENTRATIONS } from "@/utils/constants";
 
 export default function NewProductPage() {
   const router = useRouter();
-  const [images, setImages] = useState<string[]>([]);
+  const [categories, setCategories] = useState<{ _id: string; name: string }[]>([]);
+  const [loadingCategories, setLoadingCategories] = useState(true);
+  const [categoryError, setCategoryError] = useState<string | null>(null);
+  const [imageFiles, setImageFiles] = useState<File[]>([]);
+  const [previews, setPreviews] = useState<string[]>([]);
   const [saving, setSaving] = useState(false);
+
+  useEffect(() => {
+    const loadCategories = async () => {
+      setLoadingCategories(true);
+      try {
+        const res = await fetch("/api/categories");
+        const json = await res.json();
+        if (json.success) {
+          setCategories(json.data || []);
+          setCategoryError(null);
+        } else {
+          setCategoryError(json.error || "Failed to load categories");
+        }
+      } catch (err) {
+        console.error(err);
+        setCategoryError("Failed to load categories");
+      } finally {
+        setLoadingCategories(false);
+      }
+    };
+
+    loadCategories();
+  }, []);
 
   const handleImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
     if (!files) return;
-    const urls = Array.from(files).map((file) => URL.createObjectURL(file));
-    setImages((prev) => [...prev, ...urls]);
+
+    const fileArray = Array.from(files);
+    const urls = fileArray.map((file) => URL.createObjectURL(file));
+
+    setImageFiles((prev) => [...prev, ...fileArray]);
+    setPreviews((prev) => [...prev, ...urls]);
   };
 
   const removeImage = (index: number) => {
-    setImages((prev) => prev.filter((_, i) => i !== index));
+    setPreviews((prev) => {
+      URL.revokeObjectURL(prev[index]);
+      return prev.filter((_, i) => i !== index);
+    });
+    setImageFiles((prev) => prev.filter((_, i) => i !== index));
   };
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setSaving(true);
-    // const formData = new FormData(e.currentTarget);
-    // await fetch("/api/admin/products", { method: "POST", body: formData });
-    await new Promise((r) => setTimeout(r, 700)); // placeholder
-    setSaving(false);
-    router.push("/admin/products");
+    // setError(null);
+
+    try {
+      const formData = new FormData(e.currentTarget);
+
+      // The native input's "images" entry (if any) is irrelevant —
+      // imageFiles (state) is the real source of truth
+      formData.delete("images");
+      imageFiles.forEach((file) => formData.append("images", file));
+
+      formData.set(
+        "fragranceNotes",
+        JSON.stringify({
+          top: formData.get("topNotes")?.toString().split(",").map((n) => n.trim()).filter(Boolean) || [],
+          middle: formData.get("middleNotes")?.toString().split(",").map((n) => n.trim()).filter(Boolean) || [],
+          base: formData.get("baseNotes")?.toString().split(",").map((n) => n.trim()).filter(Boolean) || [],
+        })
+      );
+
+      if (!imageFiles.length) {
+        formData.append("existingImages", "/products/blue-haven.PNG");
+      }
+
+      const response = await fetch("/api/products", {
+        method: "POST",
+        body: formData, // do NOT set Content-Type — browser sets the multipart boundary itself
+      });
+
+      const data = await response.json();
+      if (!response.ok) {
+        console.log(data.error || "Failed to create product");
+        return;
+      }
+
+      router.push("/admin/products");
+    } catch (err) {
+      console.error("Submit failed", err);
+      console.log(err instanceof Error ? err.message : "Something went wrong");
+    } finally {
+      setSaving(false);
+    }
   };
 
   return (
@@ -89,7 +160,7 @@ export default function NewProductPage() {
 
             <div className="flex flex-col gap-3">
               <div className="flex flex-wrap gap-4">
-                {images.map((src, i) => (
+                {previews.map((src, i) => (
                   <div key={src} className="relative w-36 h-36 bg-ink-soft border border-brass/20 overflow-hidden">
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img src={src} alt="" className="w-full h-full object-cover" />
@@ -218,10 +289,24 @@ export default function NewProductPage() {
                 required
                 className="bg-ink-soft border border-brass/20 px-4 py-3 text-sm text-ivory focus:outline-none focus:border-brass transition-colors"
               >
-                {CATEGORIES.map((cat) => (
-                  <option key={cat} value={cat}>{cat}</option>
-                ))}
+                <option>Select Category</option>
+                {loadingCategories ? (
+                  <option value="" disabled>
+                    Loading categories...
+                  </option>
+                ) : categories.length ? (
+                  categories.map((cat) => (
+                    <option key={cat._id} value={cat._id}>
+                      {cat.name}
+                    </option>
+                  ))
+                ) : (
+                  <option value="" disabled>
+                    No categories available
+                  </option>
+                )}
               </select>
+              {categoryError && <p className="text-xs text-red-400">{categoryError}</p>}
             </div>
 
             <div className="flex flex-col gap-2">

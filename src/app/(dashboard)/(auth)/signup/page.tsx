@@ -1,44 +1,23 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import Link from "next/link";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { Eye, EyeOff } from "lucide-react";
 import BurnDivider from "@/components/BurnDivider";
 
-export default function LoginPage() {
+export default function SignupPage() {
   const router = useRouter();
-  const searchParams = useSearchParams();
-  const nextUrl = searchParams.get("next") || "/shop";
   const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [checkingAuth, setCheckingAuth] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [formData, setFormData] = useState({
+    name: "",
     email: "",
     password: "",
+    confirmPassword: "",
   });
-
-  useEffect(() => {
-    const verifySession = async () => {
-      try {
-        const response = await fetch("/api/auth/me", {
-          credentials: "include",
-        });
-
-        if (response.ok) {
-          router.replace(nextUrl);
-          return;
-        }
-      } catch (err) {
-        console.error("Auth check failed:", err);
-      } finally {
-        setCheckingAuth(false);
-      }
-    };
-
-    verifySession();
-  }, [nextUrl, router]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -54,32 +33,39 @@ export default function LoginPage() {
     setLoading(true);
 
     try {
-      if (!formData.email || !formData.password) {
-        setError("Email and password are required");
+      if (!formData.name || !formData.email || !formData.password || !formData.confirmPassword) {
+        setError("All fields are required");
         setLoading(false);
         return;
       }
 
-      const response = await fetch("/api/auth/login", {
+      if (formData.password.length < 8) {
+        setError("Password must be at least 8 characters long");
+        setLoading(false);
+        return;
+      }
+
+      const response = await fetch("/api/auth/signup", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(formData),
+        body: JSON.stringify({
+          name: formData.name,
+          email: formData.email,
+          password: formData.password,
+          confirmPassword: formData.confirmPassword,
+        }),
       });
 
       const data = await response.json();
 
       if (!response.ok) {
-        setError(data.error || "Failed to login");
+        setError(data.error || "Failed to create account");
         setLoading(false);
         return;
       }
 
-      // Redirect based on user role
-      if (data.user.role === "admin") {
-        router.push("/admin");
-      } else {
-        router.push(nextUrl);
-      }
+      // Redirect to home page or dashboard
+      router.push("/");
     } catch (err) {
       setError("An error occurred. Please try again.");
       setLoading(false);
@@ -97,24 +83,34 @@ export default function LoginPage() {
         </div>
 
         <div className="flex flex-col gap-2 text-center">
-          <h1 className="font-display text-2xl text-ivory">Sign in to your account</h1>
+          <h1 className="font-display text-2xl text-ivory">Create your account</h1>
           <p className="text-sm text-smoke-light font-body">
-            Manage your orders, addresses, and saved fragrances.
+            Join us to start shopping and track your orders.
           </p>
         </div>
 
         <form onSubmit={handleSubmit} className="flex flex-col gap-5">
-          {checkingAuth ? (
-            <div className="p-4 bg-smoke border border-smoke-light rounded text-smoke-light text-center">
-              Checking your session…
-            </div>
-          ) : null}
-
           {error && (
             <div className="p-3 bg-red-900/20 border border-red-500/50 rounded text-red-300 text-sm">
               {error}
             </div>
           )}
+
+          <div className="flex flex-col gap-1">
+            <label htmlFor="name" className="text-sm font-body text-smoke-light">
+              Full Name
+            </label>
+            <input
+              id="name"
+              name="name"
+              type="text"
+              value={formData.name}
+              onChange={handleChange}
+              placeholder="John Doe"
+              className="w-full px-4 py-3 bg-smoke border border-smoke-light rounded focus:outline-none focus:border-ivory text-ivory placeholder:text-smoke-light"
+              required
+            />
+          </div>
 
           <div className="flex flex-col gap-1">
             <label htmlFor="email" className="text-sm font-body text-smoke-light">
@@ -155,21 +151,47 @@ export default function LoginPage() {
                 {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
               </button>
             </div>
+            <p className="text-xs text-smoke-light mt-1">At least 8 characters</p>
+          </div>
+
+          <div className="flex flex-col gap-1">
+            <label htmlFor="confirmPassword" className="text-sm font-body text-smoke-light">
+              Confirm Password
+            </label>
+            <div className="relative">
+              <input
+                id="confirmPassword"
+                name="confirmPassword"
+                type={showConfirmPassword ? "text" : "password"}
+                value={formData.confirmPassword}
+                onChange={handleChange}
+                placeholder="••••••••"
+                className="w-full px-4 py-3 bg-smoke border border-smoke-light rounded focus:outline-none focus:border-ivory text-ivory placeholder:text-smoke-light"
+                required
+              />
+              <button
+                type="button"
+                onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-smoke-light hover:text-ivory"
+              >
+                {showConfirmPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+              </button>
+            </div>
           </div>
 
           <button
             type="submit"
-            disabled={loading || checkingAuth}
+            disabled={loading}
             className="w-full px-4 py-3 bg-ivory text-ink font-body font-semibold rounded hover:bg-smoke-light transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            {loading ? "Signing in..." : "Sign in"}
+            {loading ? "Creating account..." : "Create account"}
           </button>
         </form>
 
         <div className="text-center text-sm text-smoke-light font-body">
-          Don't have an account?{" "}
-          <Link href="/signup" className="text-ivory hover:underline">
-            Create one
+          Already have an account?{" "}
+          <Link href="/login" className="text-ivory hover:underline">
+            Sign in
           </Link>
         </div>
       </div>

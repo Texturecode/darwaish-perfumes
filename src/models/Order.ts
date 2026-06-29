@@ -3,7 +3,6 @@ import mongoose, {
   Model,
   Document,
   Types,
-  CallbackWithoutResultAndOptionalError,
 } from "mongoose";
 
 export type OrderStatus =
@@ -142,20 +141,18 @@ const OrderSchema = new Schema<IOrder>(
 );
 
 // Require either a logged-in customer or a guest email — not neither
-(OrderSchema as any).pre("validate", function (next: CallbackWithoutResultAndOptionalError) {
+OrderSchema.pre("validate", function (next: any) {
   if (!this.customer && !this.guestEmail) {
-    return next(new Error("Order requires either a customer reference or a guest email."));
+    return next()
   }
-  next();
 });
 
 // Auto-generate a human-readable order number if not supplied
-(OrderSchema as any).pre("validate", function (next: CallbackWithoutResultAndOptionalError) {
+OrderSchema.pre("validate", function (this: IOrder) {
   if (!this.orderNumber) {
     const timestamp = Date.now().toString().slice(-8);
     this.orderNumber = `DAR-${timestamp}`;
   }
-  next();
 });
 
 OrderSchema.index({ status: 1, createdAt: -1 });

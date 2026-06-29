@@ -1,8 +1,15 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
-import { Search, ShoppingBag, Menu, X } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { Search, ShoppingBag, Menu, X, LogOut } from "lucide-react";
+
+interface User {
+  userId: string;
+  email: string;
+  role: "customer" | "admin";
+}
 
 const NAV_LINKS = [
   { label: "Shop", href: "/shop" },
@@ -13,8 +20,57 @@ const NAV_LINKS = [
   { label: "Contact", href: "/contact" },
 ];
 
-export default function Header({ cartCount = 0 }: { cartCount?: number }) {
+export default function Header({ cartCount: initialCartCount = 0 }: { cartCount?: number }) {
+  const router = useRouter();
   const [menuOpen, setMenuOpen] = useState<boolean>(false);
+  const [user, setUser] = useState<User | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [cartCount, setCartCount] = useState(initialCartCount);
+
+  useEffect(() => {
+    const fetchUser = async () => {
+      try {
+        const res = await fetch("/api/auth/me", { credentials: "include" });
+        if (res.ok) {
+          const data = await res.json();
+          setUser(data.user);
+
+          // Fetch cart for authenticated user
+          const cartRes = await fetch("/api/cart", { credentials: "include" });
+          if (cartRes.ok) {
+            const cartData = await cartRes.json();
+            const cartCount = cartData.data?.items?.length
+            setCartCount(cartCount);
+          }
+        } 
+      } catch (err) {
+        console.error("Failed to fetch user:", err);
+        // Fallback to localStorage
+        const localCart = localStorage.getItem("cart");
+        if (localCart) {
+          const items = JSON.parse(localCart);
+          const count = items.reduce((sum: number, item: any) => sum + item.quantity, 0);
+          setCartCount(count);
+        }
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchUser();
+
+  }, []);
+
+  const handleLogout = async () => {
+    try {
+      await fetch("/api/auth/logout", { method: "POST", credentials: "include" });
+      setUser(null);
+      router.refresh();
+      router.push("/");
+    } catch (err) {
+      console.error("Logout failed:", err);
+    }
+  };
 
   return (
     <header className="sticky top-0 z-50 w-full bg-ink/95 backdrop-blur-sm border-b border-brass/20">
@@ -72,13 +128,39 @@ export default function Header({ cartCount = 0 }: { cartCount?: number }) {
                 </span>
               )}
             </Link>
+
+            {/* Auth section */}
+            {!loading && (
+              <>
+                {user ? (
+                  <div className="flex items-center gap-3">
+                    <span className="text-sm text-smoke">{user.email.split("@")[0]}</span>
+                    <button
+                      onClick={handleLogout}
+                      aria-label="Logout"
+                      className="text-ivory hover:text-brass transition-colors"
+                      title="Logout"
+                    >
+                      <LogOut size={20} />
+                    </button>
+                  </div>
+                ) : (
+                  <Link
+                    href="/login"
+                    className="text-sm text-smoke hover:text-brass transition-colors uppercase tracking-wide"
+                  >
+                    Login
+                  </Link>
+                )}
+              </>
+            )}
           </div>
         </div>
       </div>
 
       {/* Mobile menu drawer */}
       {menuOpen && (
-        <div className="lg:hidden absolute h-96 inset-0 z-50 bg-ink/98  flex flex-col px-8 py-6">
+        <div className="lg:hidden absolute h-screen inset-0 z-50 bg-ink/98 flex flex-col px-8 py-6">
           <button
             className="self-end text-ivory mb-10"
             onClick={() => setMenuOpen(false)}
@@ -86,7 +168,7 @@ export default function Header({ cartCount = 0 }: { cartCount?: number }) {
           >
             <X size={24} />
           </button>
-          <nav className="flex flex-col gap-8">
+          <nav className="flex flex-col gap-8 flex-1">
             {NAV_LINKS.map((link) => (
               <Link
                 key={link.href}
@@ -98,6 +180,33 @@ export default function Header({ cartCount = 0 }: { cartCount?: number }) {
               </Link>
             ))}
           </nav>
+
+          {/* Mobile auth */}
+          <div className="border-t border-brass/20 pt-6 pb-4">
+            {user ? (
+              <div className="flex flex-col gap-4">
+                <p className="text-sm text-smoke">{user.email}</p>
+                <button
+                  onClick={() => {
+                    handleLogout();
+                    setMenuOpen(false);
+                  }}
+                  className="flex items-center gap-2 text-ivory hover:text-brass transition-colors font-body text-sm uppercase"
+                >
+                  <LogOut size={18} />
+                  Logout
+                </button>
+              </div>
+            ) : (
+              <Link
+                href="/login"
+                onClick={() => setMenuOpen(false)}
+                className="text-ivory hover:text-brass transition-colors font-display text-2xl"
+              >
+                Login
+              </Link>
+            )}
+          </div>
         </div>
       )}
     </header>

@@ -13,7 +13,6 @@ const CategorySchema = new Schema<ICategory>(
     {
         name: {
             type: String,
-            required: true,
             trim: true,
             unique: true,
         },
@@ -38,15 +37,16 @@ const CategorySchema = new Schema<ICategory>(
 );
 
 // Auto-generate slug from name if not explicitly provided
-CategorySchema.pre("validate", function (next) {
-    if (!this.slug && this.name) {
-        this.slug = this.name
-            .toLowerCase()
-            .trim()
-            .replace(/[^a-z0-9]+/g, "-")
-            .replace(/(^-|-$)/g, "");
-    }
-});
+// CategorySchema.pre("validate", function (this: ICategory) {
+//     console.log("NA<E", this.name)
+//     if (!this.slug && this.name) {
+//         this.slug = this.name
+//             .toLowerCase()
+//             .trim()
+//             .replace(/[^a-z0-9]+/g, "-")
+//             .replace(/(^-|-$)/g, "");
+//     }
+// });
 
 // Virtual: product count is computed via a separate query in practice
 // (see lib/queries — kept out of the schema to avoid a circular import
