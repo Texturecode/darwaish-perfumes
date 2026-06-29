@@ -24,4 +24,4 @@ jobs:
             npm install
             npm run build
             npm run start
-            pm2 start "npm run start" --name=darwaish 
+            pm2 restart 1
