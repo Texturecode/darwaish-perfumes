@@ -41,7 +41,7 @@ export default function Home() {
   }
 
   const signatureSeries = products?.slice(0, 4);
-  const featured = (products as any[]).filter((p) => p.isFeatured)?.slice(0, 4);
+  const featured = (products as any[])?.filter((p) => p.isFeatured)?.slice(0, 4);
 
   return (
     <main>
