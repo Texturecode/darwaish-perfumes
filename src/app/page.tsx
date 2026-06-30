@@ -1,3 +1,6 @@
+"use client";
+
+import { useEffect, useState } from "react";
 import Header from "@/components/Header";
 import Hero from "@/components/Hero";
 import ProductCarousel from "@/components/products/ProductCarousel";
@@ -7,26 +10,38 @@ import BrandStory from "@/components/BrandStory";
 import Footer from "@/components/Footer";
 import { Product as ProductType } from "@/components/types";
 
-async function getProducts(): Promise<ProductType[]> {
-  const URL = process.env.NEXT_PUBLIC_API_URL
+export default function Home() {
+  const [products, setProducts] = useState<ProductType[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  const res = await fetch(`${URL}/api/products`, {
-    cache: "no-store",
-  });
+  useEffect(() => {
+    async function fetchProducts() {
+      try {
+        const res = await fetch("/api/products");
+        if (!res.ok) throw new Error("Failed to fetch products");
+        const data = await res.json();
+        setProducts(data.products);
+      } catch (err: any) {
+        setError(err.message);
+      } finally {
+        setLoading(false);
+      }
+    }
 
-  if (!res.ok) {
-    throw new Error("Failed to fetch products");
+    fetchProducts();
+  }, []);
+
+  if (loading) {
+    return <div className="py-20 text-center">Loading...</div>;
   }
 
-  const data = await res.json();
-  return data.products as ProductType[];
-}
-
-export default async function Home() {
-  const products = await getProducts();
+  if (error) {
+    return <div className="py-20 text-center text-red-500">{error}</div>;
+  }
 
   const signatureSeries = products.slice(0, 4);
-  const featured = products.filter((p: any) => p.isFeatured).slice(0, 4);
+  const featured = (products as any[]).filter((p) => p.isFeatured).slice(0, 4);
 
   return (
     <main>
