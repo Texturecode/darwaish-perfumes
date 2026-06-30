@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Upload, X } from "lucide-react";
 import { CONCENTRATIONS } from "@/utils/constants";
+import imageCompression from "browser-image-compression";
 
 export default function NewProductPage() {
   const router = useRouter();
@@ -37,14 +38,26 @@ export default function NewProductPage() {
     loadCategories();
   }, []);
 
-  const handleImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+
+  const handleImageSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
     if (!files) return;
 
     const fileArray = Array.from(files);
-    const urls = fileArray.map((file) => URL.createObjectURL(file));
 
-    setImageFiles((prev) => [...prev, ...fileArray]);
+    const compressedFiles = await Promise.all(
+      fileArray.map((file) =>
+        imageCompression(file, {
+          maxSizeMB: 1,
+          maxWidthOrHeight: 1920,
+          useWebWorker: true,
+        })
+      )
+    );
+
+    const urls = compressedFiles.map((file) => URL.createObjectURL(file));
+
+    setImageFiles((prev) => [...prev, ...compressedFiles]);
     setPreviews((prev) => [...prev, ...urls]);
   };
 
