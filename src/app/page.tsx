@@ -6,38 +6,26 @@ import TrustStrip from "@/components/TrustStrip";
 import BrandStory from "@/components/BrandStory";
 import Footer from "@/components/Footer";
 import { Product as ProductType } from "@/components/types";
-import { connectDB } from "@/config/mongodb";
-import ProductModel from "@/models/Product";
 
-const DEFAULT_IMAGE = "/products/blue-haven.PNG";
+async function getProducts(): Promise<ProductType[]> {
 
-function mapProduct(product: any): ProductType {
-  return {
-    id: product._id.toString(),
-    name: product.name,
-    slug: product.slug,
-    images: product.images?.length ? product.images : [DEFAULT_IMAGE],
-    price: product.price,
-    compareAtPrice: product.compareAtPrice,
-    notes: product.notes,
-    rating: product.rating,
-    reviewCount: product.reviewCount,
-    soldOut: product.status === "Sold Out",
-  };
+  const res = await fetch(`/api/products`, {
+    cache: "no-store",
+  });
+
+  if (!res.ok) {
+    throw new Error("Failed to fetch products");
+  }
+
+  const data = await res.json();
+  return data.products as ProductType[];
 }
 
 export default async function Home() {
-  await connectDB();
+  const products = await getProducts();
 
-  const products = await ProductModel.find({ status: "Active" })
-    .sort({ createdAt: -1 })
-    .limit(8)
-    .lean();
-
-    console.log("asdf",products)
-
-  const signatureSeries = products.slice(0, 4).map(mapProduct);
-  const featured = products.filter(p => p.isFeatured).slice(0, 4).map(mapProduct);
+  const signatureSeries = products.slice(0, 4);
+  const featured = products.filter((p: any) => p.isFeatured).slice(0, 4);
 
   return (
     <main>
@@ -56,7 +44,7 @@ export default async function Home() {
         products={featured}
         viewAllHref="/shop"
       />
-      <BrandStory imageSrc="/brand/story.jpg" />
+      <BrandStory imageSrc="" />
       <Footer />
     </main>
   );
