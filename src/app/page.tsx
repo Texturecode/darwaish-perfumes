@@ -8,8 +8,9 @@ import Footer from "@/components/Footer";
 import { Product as ProductType } from "@/components/types";
 
 async function getProducts(): Promise<ProductType[]> {
+  const URL = process.env.NEXT_PUBLIC_API_URL
 
-  const res = await fetch(`/api/products`, {
+  const res = await fetch(`${URL}/api/products`, {
     cache: "no-store",
   });
 
