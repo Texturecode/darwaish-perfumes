@@ -8,7 +8,6 @@ import ProductGrid from "@/components/products/ProductGrid";
 import TrustStrip from "@/components/TrustStrip";
 import BrandStory from "@/components/BrandStory";
 import Footer from "@/components/Footer";
-import { Product as ProductType } from "@/components/types";
 
 export default function Home() {
   const [products, setProducts] = useState<any>([]);

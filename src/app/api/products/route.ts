@@ -11,7 +11,7 @@ cloudinary.config({
   api_secret: process.env.CLOUDINARY_API_SECRET,
 });
 
-const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
+// const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
 const ALLOWED_TYPES = ["image/jpeg", "image/png", "image/webp", "image/gif"];
 
 type ProductStatus = "Draft" | "Active" | "Sold Out";
@@ -161,12 +161,12 @@ export async function POST(request: NextRequest) {
           { status: 400 }
         );
       }
-      if (file.size > MAX_FILE_SIZE) {
-        return NextResponse.json(
-          { error: `File too large: ${file.name}. Max size is 5MB.` },
-          { status: 400 }
-        );
-      }
+      // if (file.size > MAX_FILE_SIZE) {
+      //   return NextResponse.json(
+      //     { error: `File too large: ${file.name}. Max size is 5MB.` },
+      //     { status: 400 }
+      //   );
+      // }
     }
 
     // Upload all new files to Cloudinary in parallel
