@@ -40,8 +40,8 @@ export default function Home() {
     return <div className="py-20 text-center text-red-500">{error}</div>;
   }
 
-  const signatureSeries = products.slice(0, 4);
-  const featured = (products as any[]).filter((p) => p.isFeatured).slice(0, 4);
+  const signatureSeries = products?.slice(0, 4);
+  const featured = (products as any[]).filter((p) => p.isFeatured)?.slice(0, 4);
 
   return (
     <main>
