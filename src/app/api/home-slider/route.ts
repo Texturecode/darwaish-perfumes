@@ -3,6 +3,7 @@ import HomeSlider from "@/models/HomeSlider";
 import { NextRequest, NextResponse } from "next/server";
 import { requireAdmin } from "@/utils/api-auth";
 import { v2 as cloudinary } from "cloudinary";
+import mongoose from "mongoose";
 
 cloudinary.config({
   cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
@@ -36,6 +37,7 @@ export async function GET() {
       {
         success: true,
         data: slides.length ? slides.map((slide) => ({
+          _id: slide._id,
           src: slide.src,
           alt: slide.alt || "Homepage slider image",
           title: slide.title || "",
@@ -71,20 +73,23 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    const file = files[0];
+
     await connectDB();
 
-    const uploadedUrls = await Promise.all(files.map((file) => uploadToCloudinary(file)));
+    const uploadedUrl = await uploadToCloudinary(file);
 
-    const savedSlides = await HomeSlider.insertMany(
-      uploadedUrls.map((src, index) => ({
-        src,
-        alt: `Homepage slider image ${index + 1}`,
-        order: index,
+    const savedSlides = await HomeSlider.insertMany([
+      {
+        src: uploadedUrl,
+        alt: `Homepage slider image ${Date.now()}`,
+        order: await HomeSlider.countDocuments({ isActive: true }),
         isActive: true,
-      }))
-    );
+      },
+    ]);
 
     const slides = savedSlides.map((slide) => ({
+      _id: slide._id,
       src: slide.src,
       alt: slide.alt,
       title: slide.title || "",
@@ -98,18 +103,41 @@ export async function POST(request: NextRequest) {
   } catch (error) {
     console.error("Home slider upload error:", error);
     return NextResponse.json(
-      { error: "Failed to upload slider images" },
+      { error: "Failed to upload slider image" },
       { status: 500 }
     );
   }
 }
 
-export async function DELETE() {
+export async function DELETE(request: NextRequest) {
   try {
     const auth = await requireAdmin();
     if (auth.error) return auth.response;
 
+    const { searchParams } = new URL(request.url);
+    const id = searchParams.get("id");
+
     await connectDB();
+
+    if (id && mongoose.Types.ObjectId.isValid(id)) {
+      const deleted = await HomeSlider.findByIdAndDelete(id);
+
+      const remaining = await HomeSlider.find({ isActive: true }).sort({ order: 1, createdAt: 1 }).lean();
+
+      return NextResponse.json(
+        {
+          success: true,
+          data: remaining.map((slide) => ({
+            _id: slide._id,
+            src: slide.src,
+            alt: slide.alt || "Homepage slider image",
+          })),
+          deleted: !!deleted,
+        },
+        { status: 200 }
+      );
+    }
+
     await HomeSlider.deleteMany({});
 
     return NextResponse.json(

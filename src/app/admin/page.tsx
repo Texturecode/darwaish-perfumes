@@ -9,7 +9,7 @@ export default function AdminDashboard() {
     totalOrders: 0,
     totalRevenue: 0,
   });
-  const [slider, setSlider] = useState<{ src: string; alt: string }[]>([]);
+  const [slider, setSlider] = useState<{ _id?: string; src: string; alt: string }[]>([]);
   const [loading, setLoading] = useState(true);
   const [savingSlider, setSavingSlider] = useState(false);
   const [sliderMessage, setSliderMessage] = useState<string | null>(null);
@@ -38,6 +38,7 @@ export default function AdminDashboard() {
         const sliderData = await sliderRes.json();
         if (sliderData.success && Array.isArray(sliderData.data)) {
           setSlider(sliderData.data.map((item: any) => ({
+            _id: item._id,
             src: item.src,
             alt: item.alt || "Homepage slider image",
           })));
@@ -53,15 +54,15 @@ export default function AdminDashboard() {
   }, []);
 
   const handleSliderUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
-    const files = Array.from(event.target.files || []);
-    if (!files.length) return;
+    const file = event.target.files?.[0];
+    if (!file) return;
 
     setSavingSlider(true);
     setSliderMessage(null);
 
     try {
       const formData = new FormData();
-      files.forEach((file) => formData.append("images", file));
+      formData.append("images", file);
 
       const res = await fetch("/api/home-slider", {
         method: "POST",
@@ -70,19 +71,24 @@ export default function AdminDashboard() {
 
       const data = await res.json();
       if (!res.ok) {
-        setSliderMessage(data.error || "Failed to upload slides");
+        setSliderMessage(data.error || "Failed to upload slide");
         return;
       }
 
-      setSlider(data.data.map((item: any) => ({
+      const nextSlides = data.data.map((item: any) => ({
+        _id: item._id,
         src: item.src,
         alt: item.alt || "Homepage slider image",
-      })));
-      setSliderMessage("Slider images saved successfully.");
+      }));
+
+      setSlider((prev) => [...prev, ...nextSlides.filter(
+        (nextSlide) => !prev.some((existing) => existing.src === nextSlide.src)
+      )]);
+      setSliderMessage("Slider image saved successfully.");
       event.target.value = "";
     } catch (error) {
       console.error(error);
-      setSliderMessage("Something went wrong while uploading slider images.");
+      setSliderMessage("Something went wrong while uploading slider image.");
     } finally {
       setSavingSlider(false);
     }
@@ -102,6 +108,29 @@ export default function AdminDashboard() {
     } catch (error) {
       console.error(error);
       setSliderMessage("Failed to restore the default slider.");
+    }
+  };
+
+  const handleSliderRemove = async (id?: string) => {
+    if (!id) return;
+
+    try {
+      const res = await fetch(`/api/home-slider?id=${encodeURIComponent(id)}`, {
+        method: "DELETE",
+      });
+
+      const data = await res.json();
+      if (!res.ok) {
+        setSliderMessage(data.error || "Failed to remove slider image");
+        return;
+      }
+
+      const nextSlides = slider.filter((slide) => slide._id !== id);
+      setSlider(nextSlides);
+      setSliderMessage("Slider image removed.");
+    } catch (error) {
+      console.error(error);
+      setSliderMessage("Failed to remove slider image.");
     }
   };
 
@@ -161,15 +190,25 @@ export default function AdminDashboard() {
         </div>
 
         <label className="block w-full cursor-pointer rounded border border-dashed border-brass/30 bg-ink-soft p-4 text-sm text-smoke-light hover:border-brass hover:text-brass transition-colors">
-          <span>{savingSlider ? "Uploading..." : "Upload slider images"}</span>
-          <input type="file" accept="image/*" multiple className="hidden" onChange={handleSliderUpload} />
+          <span>{savingSlider ? "Uploading..." : "Upload slider image"}</span>
+          <input type="file" accept="image/*" className="hidden" onChange={handleSliderUpload} />
         </label>
 
         {slider.length ? (
           <div className="mt-4 grid grid-cols-2 md:grid-cols-4 gap-3">
             {slider.map((slide, index) => (
-              <div key={`${slide.src}-${index}`} className="overflow-hidden rounded border border-smoke/30 bg-ink-soft">
+              <div key={`${slide.src}-${index}`} className="relative overflow-hidden rounded border border-smoke/30 bg-ink-soft">
                 <img src={slide.src} alt={slide.alt} className="h-28 w-full object-cover" />
+                {slide._id && (
+                  <button
+                    type="button"
+                    onClick={() => handleSliderRemove(slide._id)}
+                    className="absolute right-2 top-2 flex h-7 w-7 items-center justify-center rounded-full bg-oxblood text-xs font-bold text-ivory hover:bg-red-600"
+                    aria-label={`Remove slider image ${index + 1}`}
+                  >
+                    ×
+                  </button>
+                )}
               </div>
             ))}
           </div>
