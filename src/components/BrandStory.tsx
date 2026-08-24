@@ -21,7 +21,7 @@ export default function BrandStory({
         }`}
       >
         <div className="relative aspect-[4/5] w-full bg-ink-soft [direction:ltr]">
-          <Image src={imageSrc} alt={imageAlt} fill className="object-cover" />
+          {imageSrc && <Image src={imageSrc } alt={imageAlt} fill className="object-cover" />}
         </div>
 
         <div className="flex flex-col gap-6 [direction:ltr]">

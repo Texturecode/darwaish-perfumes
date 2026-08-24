@@ -31,8 +31,6 @@ export default function Home() {
     fetchProducts();
   }, []);
 
-  console.log(products)
-
   if (loading) {
     return <div className="py-20 text-center">Loading...</div>;
   }

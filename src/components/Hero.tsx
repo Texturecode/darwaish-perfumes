@@ -3,26 +3,55 @@
 import Image from "next/image";
 import { useEffect, useState } from "react";
 
-/**
- * Hero — the page's thesis. A still product shot anchors the frame; the
- * "smoke" is a slow, CSS-only ambient blur drifting behind the headline,
- * referencing incense rising rather than a generic gradient glow.
- */
-const slides = [
+const defaultSlides = [
     { src: "/hero.PNG", alt: "Hero Product 1" },
     { src: "/hero2.PNG", alt: "Hero Product 2" },
 ];
 
 export default function Hero() {
+    const [slides, setSlides] = useState(defaultSlides);
     const [activeIndex, setActiveIndex] = useState(0);
 
     useEffect(() => {
+        let mounted = true;
+
+        async function fetchSlides() {
+            try {
+                const res = await fetch("/api/home-slider");
+                if (!res.ok) return;
+
+                const data = await res.json();
+                const nextSlides = (data?.data ?? []).map((slide: any) => ({
+                    src: slide.src,
+                    alt: slide.alt || "Homepage slider image",
+                }));
+
+                if (mounted && nextSlides.length) {
+                    setSlides(nextSlides);
+                }
+            } catch {
+                // Keep the default artwork when no saved slides are available.
+            }
+        }
+
+        fetchSlides();
+
+        return () => {
+            mounted = false;
+        };
+    }, []);
+
+    useEffect(() => {
+        if (!slides.length) return;
+
         const timer = window.setInterval(
             () => setActiveIndex((current) => (current + 1) % slides.length),
             6000
         );
         return () => window.clearInterval(timer);
-    }, []);
+    }, [slides]);
+
+    const safeSlides = slides.length ? slides : defaultSlides;
 
     return (
         <section className="relative left-1/2 right-1/2 w-screen max-w-none h-70 md:h-[85vh] md:min-h-140 overflow-hidden bg-black -translate-x-1/2">
@@ -36,9 +65,9 @@ export default function Hero() {
             />
 
             <div className="absolute inset-0 h-full w-full">
-                {slides.map((slide, index) => (
+                {safeSlides.map((slide, index) => (
                     <div
-                        key={slide.src}
+                        key={`${slide.src}-${index}`}
                         className={`absolute inset-0 transition-opacity duration-1000 ${
                             index === activeIndex ? "opacity-100" : "opacity-0"
                         }`}
@@ -56,7 +85,7 @@ export default function Hero() {
             </div>
 
             <div className="absolute bottom-6 left-1/2 z-20 flex -translate-x-1/2 gap-2">
-                {slides.map((_, index) => (
+                {safeSlides.map((_, index) => (
                     <button
                         key={index}
                         type="button"

@@ -9,3 +9,6 @@ export type { IOrder, OrderStatus, PaymentStatus } from "./Order";
 
 export { default as User } from "./User";
 export type { IUser, UserRole } from "./User";
+
+export { default as HomeSlider } from "./HomeSlider";
+export type { IHomeSlider } from "./HomeSlider";
